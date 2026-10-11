@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Account Provisioning Studio</title>
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Top Navigation Header -->
+    <header class="app-header">
+      <div class="brand-group">
+        <div class="brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">Provisioning Studio</h1>
+          <p class="brand-subtitle">BrightEdge Site Agent & IXF Automation</p>
+        </div>
+      </div>
+
+      <div class="header-metrics">
+        <div class="metric-pill" id="metricTotal">
+          <span class="metric-label">Accounts</span>
+          <span class="metric-val" id="totalCount">0</span>
+        </div>
+        <div class="metric-pill metric-ready" id="metricReady">
+          <span class="metric-dot"></span>
+          <span class="metric-label">Ready to provision</span>
+          <span class="metric-val" id="readyCount">0</span>
+        </div>
+        <div class="metric-pill metric-warning" id="metricIncomplete">
+          <span class="metric-dot"></span>
+          <span class="metric-label">Incomplete</span>
+          <span class="metric-val" id="incompleteCount">0</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="app-main">
+      <section id="syncBanner" class="sync-banner" hidden role="status"><span><strong>New account changes are available.</strong> Review and merge them with your edits.</span><button class="btn btn-primary" id="reviewIncoming">Review incoming changes</button></section>
+      <!-- Action Toolbar -->
+      <section class="toolbar-card">
+        <div class="toolbar-left">
+          <button type="button" class="btn btn-primary" id="btnAddRow" title="Add a new account row (Enter)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Add Account
+          </button>
+          <button type="button" class="btn btn-secondary" id="btnBulkPaste" title="Paste multiple accounts from Excel or CSV">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            Import
+          </button>
+        </div>
+
+        <div class="toolbar-right">
+
+          <button type="button" class="btn btn-secondary" id="btnSaveAccounts" title="Save current accounts to data/accounts.json">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+            Save accounts
+          </button>
+
+          <details class="tools-menu"><summary>Tools & connection</summary><div><span id="extensionStatus" role="status">Checking pairing…</span><button class="btn btn-secondary" id="btnExtension">Extension settings</button><button type="button" class="btn btn-secondary" id="btnRunDry">Dry check queue</button><small>Captures sync into Studio. Salesforce records are not modified.</small></div></details>
+
+        </div>
+      </section>
+
+      <!-- Account Data Grid Table -->
+      <section class="grid-card">
+        <div class="grid-header-meta">
+          <div>
+            <h2 class="section-heading">Account Queue</h2>
+            <p class="section-subheading">Select accounts to provision. Use the header checkbox to select all. Completed steps are preserved.</p>
+          </div>
+          <div class="grid-actions">
+            <span class="save-status-text" id="saveStatus">All changes saved</span>
+          </div>
+        </div>
+
+        <div class="queue-actions">
+          <span id="selectionCount" aria-live="polite">0 selected</span>
+          <button type="button" class="btn btn-secondary" id="btnRunSelected" disabled>Run selected</button>
+          <button type="button" class="btn btn-secondary" id="btnRetryFailed" hidden disabled>Retry failed</button>
+          <span class="queue-help">Open Details to view or edit every field without horizontal scrolling.</span>
+        </div>
+        <div class="table-container" tabindex="0" aria-label="Account queue; scroll horizontally for more fields">
+          <table class="account-table" id="accountTable">
+            <thead>
+              <tr>
+                <th class="col-num"><input type="checkbox" id="selectAllAccounts" aria-label="Select all accounts"></th>
+                <th class="col-status">Status / Readiness</th>
+                <th class="col-name">Account Name <span class="required">*</span></th>
+                <th class="col-login">BE Login Email <span class="required">*</span></th>
+                <th class="col-org">Org ID / Acct # <span class="required">*</span></th>
+                <th class="col-url">Website URL / Domain <span class="required">*</span></th>
+                <th class="col-cms">CMS / Tech Hints</th>
+                <th class="col-tech">Command Console Integration</th>
+                <th class="col-sdk">SDK Template Folder <span class="required">*</span></th>
+                <th class="col-dropbox">Dropbox Folder / Link</th>
+                <th class="col-actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="accountTableBody">
+              <!-- Dynamically populated by app.js -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty state placeholder -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+          <div class="empty-icon">📂</div>
+          <h3>No accounts in queue</h3>
+          <p>Click "Add Account" or "Bulk Paste" from a spreadsheet to start provisioning.</p>
+          <button type="button" class="btn btn-primary" onclick="document.getElementById('btnAddRow').click()">Add First Account</button>
+        </div>
+      </section>
+
+      <!-- Provisioning Execution & Stepper Results -->
+      <section class="results-card" id="resultsSection" style="display: none;">
+        <div class="results-header">
+          <div class="results-title-group">
+            <div class="spinner" id="runSpinner" style="display: none;"></div>
+            <div>
+              <h2 class="section-heading" id="resultsTitle">Provisioning Execution</h2>
+              <p class="section-subheading" id="resultsSummary">Simulating pipeline steps...</p>
+            </div>
+          </div>
+          <div class="results-stats" id="resultsStats"></div>
+        </div>
+
+        <div class="execution-cards-list" id="executionCards">
+          <!-- Dynamically populated execution cards -->
+        </div>
+      </section>
+
+      <!-- Audit Logs Drawer -->
+      <section class="logs-card">
+        <div class="logs-header" id="toggleLogs">
+          <div class="logs-title-group">
+            <span class="logs-chevron" id="logsChevron">▶</span>
+            <span class="logs-title">System & Execution Logs</span>
+            <span class="logs-file-pill" id="logFileName">Ready</span>
+          </div>
+          <button type="button" class="btn btn-ghost btn-sm" id="btnRefreshLogs">Refresh Logs</button>
+        </div>
+        <div class="logs-body" id="logsBody" style="display: none;">
+          <pre class="logs-terminal" id="logsContent">Initializing dashboard...</pre>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bulk Paste Modal -->
+    <div class="modal-backdrop" id="bulkModal" style="display: none;">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3 class="modal-title">Bulk Paste / Import Accounts</h3>
+          <button type="button" class="modal-close" id="btnCloseBulkModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-description">
+            Copy rows from <strong>Excel</strong>, <strong>Google Sheets</strong>, or a <strong>CSV</strong> file and paste them below.<br>
+            Supports columns: <code>Account Name</code>, <code>BE Login</code>, <code>Org ID</code>, <code>Website/Domain</code>, <code>CMS Details</code> (with or without headers).
+          </p>
+          <textarea class="bulk-textarea" id="bulkInput" placeholder="Acme Corp&#9;user@acme.com&#9;123456789&#9;https://acme.com&#9;React&#10;Widget Inc&#9;admin@widget.com&#9;987654321&#9;https://widget.com&#9;WordPress"></textarea>
+          <div class="bulk-preview-bar">
+            <span id="bulkParseCount">0 rows recognized</span>
+            <label class="bulk-replace-label">
+              <input type="checkbox" id="chkReplaceExisting"> Replace existing accounts
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnCancelBulk">Cancel</button>
+          <button type="button" class="btn btn-primary" id="btnApplyBulk">Import Accounts</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Run Confirmation Modal -->
+    <div class="modal-backdrop" id="confirmRunModal" style="display: none;">
+      <div class="modal-dialog modal-dialog-sm">
+        <div class="modal-header">
+          <h3 class="modal-title">Start Live Provisioning?</h3>
+          <button type="button" class="modal-close" id="btnCloseConfirmModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-warning-text">
+            ⚠️ You are about to run <strong>LIVE</strong> browser automation for <span id="confirmCount">0</span> account(s).
+          </p>
+          <ul class="confirm-steps-list">
+            <li>BrightEdge Admin: Enable Site Agent (LR)</li>
+            <li>Command Console: Provision Org ID & IXF Whitelist</li>
+            <li>Dropbox: Create customer folder & copy SDK templates</li>
+          </ul>
+          <p class="text-muted" style="margin-top: 12px; font-size: 13px;">
+            Make sure your Chrome browser is open or ready.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnCancelRun">Cancel</button>
+          <button type="button" class="btn btn-run" id="btnProceedRun">Proceed with Live Run</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toasts container -->
+    <div class="toasts-container" id="toastsContainer"></div>
+  </div>
+
+  <script src="/integration-options.js"></script>
+  <script src="/sdk-options.js"></script>
+  <script src="/app.js"></script>
+  <script src="/account-details.js"></script>
+  <dialog id="pairDialog" class="sync-dialog">
+    <div class="sync-dialog-head"><div><small>CHROME EXTENSION</small><h2>Connect your workspace</h2></div><button data-close-dialog aria-label="Close">×</button></div>
+    <p>Load the <code>chrome-extension</code> folder from this project using <strong>Load unpacked</strong> on Chrome’s Extensions page with Developer mode enabled. Open the extension and copy its ID below.</p>
+    <form id="pairForm"><label for="extensionId">Extension ID</label><input id="extensionId" required pattern="[a-p]{32}" placeholder="Paste the ID from the extension" autocomplete="off"><button class="btn btn-primary">Generate connection key</button></form>
+    <div id="pairOutput" hidden><label for="pairToken">Connection key</label><div class="sync-token"><input id="pairToken" readonly><button class="btn btn-secondary" id="copyPairToken">Copy</button></div></div>
+    <p id="pairMessage" role="status">Connect once. Future captures sync to this computer.</p>
+  </dialog>
+  <dialog id="syncDialog" class="sync-dialog"><div class="sync-dialog-head"><h2>Review incoming changes</h2><button data-close-dialog aria-label="Close">×</button></div><div id="syncContent"></div><button class="btn btn-primary" id="syncApply">Merge into my queue</button></dialog>
+  <script src="/sync-merge.js"></script>
+  <script src="/extension-sync.js"></script>
+</body>
+</html>

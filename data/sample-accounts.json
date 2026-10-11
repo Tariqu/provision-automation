@@ -1,0 +1,16 @@
+[
+  {
+    "accountName": "Example Customer",
+    "beLogin": "customer@example.com",
+    "integrationAccountNumber": "123456789",
+    "cmsDetails": "React site with custom CMS",
+    "url": "https://www.example.com"
+  },
+  {
+    "accountName": "WordPress Demo",
+    "beLogin": "wordpress@example.com",
+    "integrationAccountNumber": "987654321",
+    "cmsDetails": "WordPress",
+    "url": "https://wordpress-demo.com"
+  }
+]

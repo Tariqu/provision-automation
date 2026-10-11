@@ -1,0 +1,10 @@
+node_modules/
+.env
+data/accounts.json
+logs/
+*.log
+.browser-profile/
+data/salesforce-scrape.json
+
+data/checkpoints/
+data/extension-pairing.json

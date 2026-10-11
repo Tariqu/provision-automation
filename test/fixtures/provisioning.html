@@ -1,0 +1,58 @@
+<form id="provisioning">
+<input id="org_art_id" name="org_art_id" value="" type="hidden">
+<input id="org_id_input" name="org_id" class="input_field" type="text" required="">
+<input id="pod_num_input" name="pod_num" class="input_field" type="text" required="" readonly="" style="border: 0px;">
+<input name="base_domain" class="input_field" type="text" required="">
+<input name="single_session" class="input_field" type="text" value="86400" required="">
+<input name="integration_sdk_detail" class="input_field" type="text" value="">
+<input name="whitelist_params" class="input_field" type="text" value="">
+<input id="javascript_version" name="javascript_version" class="input_field" type="checkbox">
+<input name="is_custom_js_sdk_enabled" class="input_field" type="checkbox">
+<select id="integration-type-select" name="integration_type" class="input_field" required="">
+                                                    
+                                                    <option value="0" selected="">
+                                                        Unknown</option>
+                                                    
+                                                    <option value="1">
+                                                        PHP (General)</option>
+                                                    
+                                                    <option value="2">
+                                                        DotNet Core 2.X (General)</option>
+                                                    
+                                                    <option value="3">
+                                                        Java</option>
+                                                    
+                                                    <option value="4">
+                                                        Drupal 8 Module</option>
+                                                    
+                                                    <option value="5">
+                                                        PHP (Drupal 7)</option>
+                                                    
+                                                    <option value="6">
+                                                        PHP (Wordpress)</option>
+                                                    
+                                                    <option value="7">
+                                                        DotNet FX 4.5 (General)</option>
+                                                    
+                                                    <option value="8">
+                                                        DotNet FX 4.5 (DNN)</option>
+                                                    
+                                                    <option value="9">
+                                                        DotNet FX 4.5 (SiteCore)</option>
+                                                    
+                                                    <option value="10">
+                                                        DotNet FX 4.5 (SiteFinity)</option>
+                                                    
+                                                    <option value="11">
+                                                        DotNet FX 4.5 (nopCommerce)</option>
+                                                    
+                                                    <option value="12">
+                                                        JavaScript</option>
+                                                    
+                                                    <option value="13">
+                                                        Custom Integration</option>
+                                                    
+                                                </select>
+</form>
+<div id="save_org">Save</div>
+<div id="activate_custom_js_sdk">Activate Custom JS SDK</div>

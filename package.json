@@ -1,0 +1,22 @@
+{
+  "name": "provision-automation",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local dashboard and automation helpers for BrightEdge account provisioning.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dry-run": "node src/cli.js --dry-run --input data/sample-accounts.json",
+    "dry-run:salesforce": "node src/cli.js --dry-run --from-salesforce",
+    "scrape:salesforce": "node src/cli.js --scrape-salesforce",
+    "chrome:open": "node src/lib/launch-chrome-debug.js",
+    "run": "node src/cli.js --input data/accounts.json",
+    "run:salesforce": "node src/cli.js --from-salesforce",
+    "check": "node src/cli.js --dry-run --input data/sample-accounts.json",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.44.0"
+  },
+  "devDependencies": {}
+}

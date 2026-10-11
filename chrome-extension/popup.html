@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Salesforce Capture</title><link rel="stylesheet" href="popup.css"></head>
+<body>
+  <header><div class="brand"><span class="mark">↙</span><div><strong>Provisioning Studio</strong><small>SALESFORCE CAPTURE</small></div></div><button id="settingsToggle" class="icon" aria-label="Connection settings" title="Connection settings">⚙</button></header>
+  <main>
+    <div class="connection"><span id="connectionDot" class="dot"></span><span id="connectionStatus">Checking connection…</span><button id="openStudio" class="text-button">Open Studio ↗</button></div>
+    <section id="settings" class="card" hidden>
+      <h2>Connect once. Capture anytime.</h2><p>In Studio, choose <strong>Connect Chrome extension</strong> and paste this extension ID.</p>
+      <div class="copy-row"><code id="extensionId"></code><button id="copyId" class="text-button">Copy</button></div>
+      <form id="settingsForm"><label for="baseUrl">Studio address</label><input id="baseUrl" type="url" value="http://localhost:3000" required><label for="token">Connection key from Studio</label><input id="token" type="password" required autocomplete="off" placeholder="Paste your connection key"><button class="primary full">Connect to Studio</button></form>
+    </section>
+    <section class="hero"><div class="eyebrow">YOUR NEXT ACCOUNT, WITHOUT THE COPY-PASTE</div><h1>Bring the record<br>into your workflow.</h1><p>Open a BE Integration record in Salesforce.<br>We’ll collect the details. You stay in control.</p><button id="capture" class="primary full"><span>＋</span> Capture current record</button></section>
+    <div id="message" role="status" hidden></div>
+    <section id="review" class="card" hidden>
+      <div class="section-title"><h2>Review capture</h2><span class="pill">01 → 02 → 03</span></div>
+      <a id="source" target="_blank" rel="noopener">View source record ↗</a>
+      <div id="warnings" class="warnings" hidden></div>
+      <form id="captureForm">
+        <label for="accountName">BE Integration Name <span>*</span></label><input id="accountName" required placeholder="Full integration name, including suffix">
+        <label for="beLogin">BE login email</label><input id="beLogin" type="email" placeholder="Not captured — enter or complete later">
+        <label for="integrationAccountNumber">Org ID / Account number</label><input id="integrationAccountNumber" inputmode="numeric" pattern="[0-9]{1,14}" placeholder="1–14 digits">
+        <label for="url">Page URL for Mockup</label><input id="url" type="url" pattern="https?://.*" placeholder="https://customer-website.com"><small class="hint">Only the mockup URL is used.</small>
+        <label for="cmsDetails">CMS / Tech hints</label><textarea id="cmsDetails" rows="3" placeholder="CMS/Language and its details"></textarea>
+        <div id="changes" hidden></div>
+        <p class="hint">Missing fields can be completed in Studio. Choose the integration and SDK there before provisioning.</p>
+        <button id="sync" class="primary full">Sync to Studio →</button>
+      </form>
+    </section>
+    <section class="history"><div class="section-title"><h2>Recent captures</h2><button id="retry" class="text-button">Retry pending</button></div><div id="queue"><p class="hint">Your captures and sync status will appear here.</p></div></section>
+    <footer>Captured on your click · Synced to this computer</footer>
+  </main><script src="extractor.js"></script><script src="popup.js"></script>
+</body></html>
