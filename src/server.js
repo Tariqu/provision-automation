@@ -300,6 +300,14 @@ const server = http.createServer(async (req, res) => {
     } catch (error) { return sendJson(res, 400, { error: error.message }); }
   }
 
+  if (req.method === 'POST' && pathname === '/api/folder-preview') {
+    try {
+      const body = await parseJsonBody(req);
+      const folder = require('./lib/folders').createSdkFolder(normalizeAccount(body.account), config, { dryRun: true });
+      return sendJson(res, 200, folder);
+    } catch (error) { return sendJson(res, 400, { error: error.message }); }
+  }
+
   // Handle API routes
   if (req.method === 'GET' && pathname === '/api/accounts') {
     return handleGetAccounts(res);

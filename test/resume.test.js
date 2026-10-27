@@ -19,7 +19,7 @@ test('SDK ID failure retries only ID update after copied-folder checkpoint', asy
   try {
     const run = () => runLiveAccount(account, { async newPage() { return { async close() {} }; } }, { dataDir: directory, selectors: {} }, {}, actions);
     const first = await run();
-    assert.equal(first.failedStep, 'sdkAccountId');
+    assert.equal(first.failedStep, 'sdkAccountId', first.error);
     assert.equal(first.account.provisioningStatus, 'Failed');
     const second = await run();
     assert.equal(second.ok, true);
@@ -57,7 +57,7 @@ test('retries persist successful steps and resume after failure, with changed in
   try {
     const run = value => runLiveAccount(value || account, context, config, {}, actions);
     const first = await run();
-    assert.equal(first.failedStep, 'commandConsoleProvisioning');
+    assert.equal(first.failedStep, 'commandConsoleProvisioning', first.error);
     assert.equal(first.steps.brightedgeSiteAgent.enabled, true);
     const second = await run();
     assert.equal(second.failedStep, 'folder');

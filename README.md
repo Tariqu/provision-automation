@@ -175,3 +175,18 @@ The queue separates provisioning status from input readiness. Select rows for **
 After copying, **Update SDK Account ID** replaces only the account setting in the selected SDK's specified sample/configuration files. It updates both PHP samples, searches nested folders for named targets, preserves file encoding and line endings, and never modifies `1-Template`. SDKs marked as not requiring an ID update are skipped. Missing required files/settings fail this step before marking the account Provisioned. A separate checkpoint allows retrying this step without repeating copying or remote provisioning. Dry checks preview the generated ID without editing files.
 
 The open dashboard checks for incoming account changes every four seconds and on returning to its tab. Clean queues update automatically without a refresh. Unsaved edits, open account dialogs, and active provisioning are protected; use the incoming-change review when edits need merging.
+
+### Shared clients with multiple domains
+
+In the Dropbox column, select **Domain subfolder** for each related account, then
+click **Preview destination**. For example, `canon.de` with the JavaScript SDK
+uses `Client SDK Folders/canon/canon.de/JavaScript`. The complete SDK directory is
+copied, and its sample receives that account's generated ID. The Dropbox result
+links to the domain directory. The default **Client folder** option keeps the
+existing folder lookup behavior.
+
+Run Dry Check before a live run to review paths. Accounts sharing an SDK path
+are rejected before browser automation. Ownership records are stored internally in `data/sdk-owners`, outside client SDK folders. Existing sample IDs belonging to another account are rejected rather than replaced.
+Changing the layout reruns folder copying and SDK personalization, while successful
+platform and Command Console checkpoints remain reusable. Existing shared folders
+are not moved or deleted.

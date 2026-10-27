@@ -3,7 +3,7 @@ const path = require('path');
 const { createCheckpoints } = require('./lib/checkpoints');
 const { enableSiteAgent, enableAutopilot } = require('./automation/brightedge');
 const { provisionAccount, checkExistingAccount } = require('./automation/commandConsole');
-const { createSdkFolder } = require('./lib/folders');
+const { createSdkFolder, validateDestinations } = require('./lib/folders');
 const { updateSalesforceApi, updateSalesforceUi } = require('./lib/salesforce');
 const { validateAccount, normalizeAccount } = require('./lib/accounts');
 
@@ -16,6 +16,7 @@ function publicAccount(account) {
     domain: account.domain,
     cmsDetails: account.cmsDetails,
     sdkFolder: account.sdkFolder || '',
+    folderLayout: account.folderLayout || 'standard',
     integrationType: account.integrationType,
     integrationConfidence: account.integrationConfidence,
     integrationReason: account.integrationReason,
@@ -69,7 +70,7 @@ async function runLiveAccount(account, context, config, options, actions = { ena
   const checkpoints = createCheckpoints(path.join(config.dataDir, 'checkpoints'), [account.integrationAccountNumber, account.beLogin]);
   const beInputs = [config.brightedgeLoginUrl, config.brightedgeManageAccountPath];
   const ccInputs = [config.commandConsoleProvisioningUrl, account.domain, account.integrationType, account.cmsDetails, config.selectors.commandConsole || {}];
-  const folderInputs = ['sdk-directory-v3', account.sdkFolder || '', account.domain, account.integrationType, account.cmsDetails, config.sdkBasePath, config.sdkTemplatePath, config.sdkTemplateMap || {}];
+  const folderInputs = ['sdk-directory-v4', account.folderLayout || 'standard', account.sdkFolder || '', account.domain, account.integrationType, account.cmsDetails, config.sdkBasePath, config.sdkTemplatePath, config.sdkTemplateMap || {}];
   let activeStep;
   async function step(name, inputs, action) {
     activeStep = name;
@@ -201,6 +202,7 @@ async function launchBrowserContext(config, logger) {
 }
 
 async function runProvisioning(accounts, config, options, logger) {
+  validateDestinations(accounts.map(normalizeAccount).filter(a => validateAccount(a, { requireSdk: !options.dryRun }).length === 0), config);
   const results = [];
   const browserSession = options.dryRun
     ? null

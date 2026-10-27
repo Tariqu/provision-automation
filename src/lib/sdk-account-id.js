@@ -36,6 +36,7 @@ function updateSdkAccountId(account, folder, options = {}) {
   if (!rules) throw new Error(`No account ID update rule for SDK ${sdk}`);
   if (options.dryRun) return { dryRun: true, accountId, sdkFolderPath: folder.sdkFolderPath, files: [], wouldUpdate: true };
   const root = path.resolve(folder.sdkFolderPath);
+  require('./folders').assertFolderOwner(root, account, folder.ownershipDataDir);
   if (folder.templatePath && fs.realpathSync(root) === fs.realpathSync(folder.templatePath)) throw new Error('Refusing to modify the source template');
   const candidates = [];
   function walk(dir) {
@@ -60,7 +61,13 @@ function updateSdkAccountId(account, folder, options = {}) {
       if (bigEndian || original[0] === 0xff && original[1] === 0xfe) encoding = 'utf16le';
       const text = bytes.toString(encoding);
       let count = 0;
-      const updated = text.replace(patternFor(sdk), (_, prefix, suffix) => { count++; return prefix + accountId + suffix; });
+      const updated = text.replace(patternFor(sdk), (match, prefix, suffix) => {
+        const current = match.slice(prefix.length, match.length - suffix.length);
+        if (/^f\d{14}$/.test(current) && current !== 'f00000000000000' && current !== accountId) {
+          throw new Error(`SDK file belongs to another account (${current}): ${item.relative}. Choose a separate domain folder.`);
+        }
+        count++; return prefix + accountId + suffix;
+      });
       if (!count) continue;
       found = true;
       const output = Buffer.from(updated, encoding);

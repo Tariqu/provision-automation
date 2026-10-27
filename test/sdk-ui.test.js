@@ -30,6 +30,7 @@ test('UI generates and copies IDs and persists an independent SDK choice', async
         if (route.request().method() === 'POST') accounts = route.request().postDataJSON().accounts;
         return route.fulfill({ json: { accounts, ok: true } });
       }
+      if (pathname === '/api/folder-preview') return route.fulfill({json:{sdkFolderPath:'clients/example/example.com/JavaScript'}});
       if (pathname.startsWith('/api/')) return route.fulfill({ json: { entries: [] } });
       const file = pathname === '/' ? 'index.html' : pathname.slice(1);
       return route.fulfill({ body: fs.readFileSync(path.join(__dirname, '../public', file)), contentType: file.endsWith('.js') ? 'application/javascript' : file.endsWith('.css') ? 'text/css' : 'text/html' });
@@ -42,9 +43,13 @@ test('UI generates and copies IDs and persists an independent SDK choice', async
     await page.locator('[data-field="integrationAccountNumber"]').fill('123');
     await page.locator('[data-action="copy-account-id"]').click();
     assert.equal(await page.evaluate(() => window.copied), generatedAccountId('123'));
+    await page.locator('[data-field="folderLayout"]').selectOption('domain');
+    await page.locator('[data-action="preview-folder"]').click();
+    await page.getByText('clients/example/example.com/JavaScript', {exact:true}).waitFor();
     await sdk.selectOption('PHP-WordPress_Plugin');
     assert.equal(await page.locator('[data-field="integrationType"]').inputValue(), 'JavaScript');
     await Promise.all([page.waitForResponse(r => r.request().method() === 'POST'), page.locator('#btnSaveAccounts').click()]);
+    assert.equal(accounts[0].folderLayout, 'domain');
     assert.equal(accounts[0].sdkFolder, 'PHP-WordPress_Plugin');
     await page.reload();
     await sdk.waitFor();

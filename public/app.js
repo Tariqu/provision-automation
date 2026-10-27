@@ -221,6 +221,12 @@ function renderTable() {
         ${sdkFolderOptions.map(name => `<option value="${name}" ${account.sdkFolder === name ? 'selected' : ''}>${name}</option>`).join('')}
       </select><span class="sdk-validation" role="status">${sdkFolderOptions.includes(account.sdkFolder) ? '' : 'Select an SDK folder'}</span></td>
       <td class="col-dropbox">
+        <select class="tech-select" data-field="folderLayout" aria-label="Dropbox folder layout">
+          <option value="standard" ${account.folderLayout !== 'domain' ? 'selected' : ''}>Client folder</option>
+          <option value="domain" ${account.folderLayout === 'domain' ? 'selected' : ''}>Domain subfolder</option>
+        </select>
+        <button type="button" class="btn-copy" data-action="preview-folder">Preview destination</button>
+        <div class="folder-preview" role="status" style="white-space:normal;overflow-wrap:anywhere"></div>
         ${account.dropboxLink ? `
           <div class="dropbox-cell">
             <span class="dropbox-path" title="${escapeHtml(account.dropboxLink)}">${escapeHtml(account.dropboxLink.split(/[\\/]/).filter(Boolean).pop())}</span>
@@ -427,6 +433,7 @@ function parseBulkData(rawText) {
         url: item.url || item.domain || '',
         cmsDetails: item.cmsDetails || item.cms || '',
         sdkFolder: item.sdkFolder || '',
+      folderLayout: item.folderLayout || 'standard',
       integrationType: item.integrationType || detectIntegrationType(item.cmsDetails || item.cms).type,
         provisioningStatus: item.provisioningStatus || item.status || 'Pending',
         dropboxLink: item.dropboxLink || item.dropbox || item.folder || '',
@@ -536,6 +543,7 @@ async function loadAccountsFromDisk() {
       url: item.url || item.domain || '',
       cmsDetails: item.cmsDetails || '',
       sdkFolder: item.sdkFolder || '',
+      folderLayout: item.folderLayout || 'standard',
       integrationType: item.integrationType || detectIntegrationType(item.cmsDetails).type,
       provisioningStatus: item.provisioningStatus || item.status || 'Pending',
       dropboxLink: item.dropboxLink || '',
@@ -841,4 +849,24 @@ window.addEventListener('beforeunload', (e) => {
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
   loadAccountsFromDisk();
+});
+// Resolve on the server so previews use the same filesystem rules as a run.
+elements.accountTableBody.addEventListener('click', async event => {
+  const button = event.target.closest('[data-action="preview-folder"]');
+  if (!button) return;
+  const row = button.closest('tr');
+  const account = state.accounts.find(item => item.id === row.dataset.id);
+  const output = row.querySelector('.folder-preview');
+  const snapshot = JSON.stringify(account);
+  output.textContent = 'Checking destination…';
+  try {
+    const response = await fetch('/api/folder-preview', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({account})});
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error);
+    if (JSON.stringify(account) === snapshot) output.textContent = data.sdkFolderPath;
+  } catch (error) { if (JSON.stringify(account) === snapshot) output.textContent = error.message; }
+});
+elements.accountTableBody.addEventListener('input', event => {
+  const row = event.target.closest('tr');
+  if (row && event.target.dataset.field) row.querySelector('.folder-preview').textContent = '';
 });
